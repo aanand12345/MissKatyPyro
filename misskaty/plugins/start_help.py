@@ -1,9 +1,3 @@
-"""
-* @author        yasir <yasiramunandar@gmail.com>
-* @date          2022-12-01 09:12:27
-* @projectName   MissKatyPyro
-* Copyright @YasirPedia All rights reserved
-"""
 import contextlib
 import re
 
@@ -16,53 +10,45 @@ from pyrogram.types import (
     Message,
 )
 
-from misskaty import BOT_NAME, BOT_USERNAME, HELPABLE, app
-from misskaty.helper import bot_sys_stats, paginate_modules
-from misskaty.helper.localization import use_chat_lang
-from misskaty.vars import COMMAND_HANDLER
+from anjani import BOT_NAME, BOT_USERNAME, HELPABLE, app
+from anjani.helper import bot_sys_stats, paginate_modules
+from anjani.helper.localization import use_chat_lang
+from anjani.vars import COMMAND_HANDLER
 
 home_keyboard_pm = InlineKeyboardMarkup(
     [
         [
             InlineKeyboardButton(text="Commands ❓", callback_data="bot_commands"),
-            InlineKeyboardButton(
-                text="Source Code 🛠",
-                url="https://github.com/yasirarism/MissKatyPyro",
-            ),
         ],
         [
             InlineKeyboardButton(
-                text="System Stats 🖥",
-                callback_data="stats_callback",
+                text="System Stats 🖥", callback_data="stats_callback"
             ),
-            InlineKeyboardButton(text="Dev 👨", url="https://t.me/YasirArisM"),
+            InlineKeyboardButton(text="Dev 👨‍💻", url="https://t.me/Sarkar_Terminal"),
         ],
         [
             InlineKeyboardButton(
                 text="Add Me To Your Group 🎉",
-                url=f"http://t.me/{BOT_USERNAME}?startgroup=new",
+                url=f"http://t.me/{BOT_USERNAME}?startgroup=true",
             )
         ],
     ]
 )
 
-home_text_pm = f"Hey there! My name is {BOT_NAME}. I have many useful features for you, feel free to add me to your group.\n\nIf you want give coffee to my owner you can send /donate command for more info."
+home_text_pm = f"""
+Hey there! I’m {BOT_NAME} ✨\n
+An anime-themed Telegram bot with awesome powers for your groups.\n
+Click below to see what I can do or add me to your group to get started!
+"""
 
 keyboard = InlineKeyboardMarkup(
     [
         [
             InlineKeyboardButton(text="Help ❓", url=f"t.me/{BOT_USERNAME}?start=help"),
-            InlineKeyboardButton(
-                text="Source Code �",
-                url="https://github.com/yasirarism/MissKatyPyro",
-            ),
         ],
         [
-            InlineKeyboardButton(
-                text="System Stats 💻",
-                callback_data="stats_callback",
-            ),
-            InlineKeyboardButton(text="Dev 👨", url="https://t.me/YasirArisM"),
+            InlineKeyboardButton(text="System Stats 💻", callback_data="stats_callback"),
+            InlineKeyboardButton(text="Dev 👨‍💻", url="https://t.me/Sarkar_Terminal"),
         ],
     ]
 )
@@ -104,31 +90,22 @@ async def start(self, ctx: Message, strings):
                 strings("help_name").format(mod=HELPABLE[module].__MODULE__)
                 + HELPABLE[module].__HELP__
             )
-            await ctx.reply_msg(
-                text,
-                disable_web_page_preview=True,
-                message_effect_id=5104841245755180586,
-            )
             if module == "federation":
                 return await ctx.reply(
                     text=text,
                     reply_markup=FED_MARKUP,
                     disable_web_page_preview=True,
-                    message_effect_id=5104841245755180586,
                 )
             await ctx.reply(
                 text,
                 reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton("back", callback_data="help_back")]]
+                    [[InlineKeyboardButton("Back", callback_data="help_back")]]
                 ),
                 disable_web_page_preview=True,
-                message_effect_id=5104841245755180586,
             )
         elif name == "help":
             text, keyb = await help_parser(ctx.from_user.first_name)
-            await ctx.reply_msg(
-                text, reply_markup=keyb, message_effect_id=5104841245755180586
-            )
+            await ctx.reply_msg(text, reply_markup=keyb)
     else:
         await self.send_photo(
             ctx.chat.id,
@@ -136,20 +113,14 @@ async def start(self, ctx: Message, strings):
             caption=home_text_pm,
             reply_markup=home_keyboard_pm,
             reply_to_message_id=ctx.id,
-            message_effect_id=5104841245755180586,
         )
 
 
 @app.on_callback_query(filters.regex("bot_commands"))
 async def commands_callbacc(_, cb: CallbackQuery):
     text, keyb = await help_parser(cb.from_user.mention)
-    await app.send_message(
-        cb.message.chat.id,
-        text=text,
-        reply_markup=keyb,
-        message_effect_id=5104841245755180586,
-    )
-    await cb.message.delete_msg()
+    await app.send_message(cb.message.chat.id, text=text, reply_markup=keyb)
+    await cb.message.delete()
 
 
 @app.on_callback_query(filters.regex("stats_callback"))
@@ -173,13 +144,10 @@ async def help_command(_, ctx: Message, strings):
                                 text=strings("click_me"),
                                 url=f"t.me/{BOT_USERNAME}?start=help_{name}",
                             )
-                        ],
+                        ]
                     ]
                 )
-                await ctx.reply_msg(
-                    strings("click_btn").format(nm=name),
-                    reply_markup=key,
-                )
+                await ctx.reply_msg(strings("click_btn").format(nm=name), reply_markup=key)
             else:
                 await ctx.reply_msg(strings("pm_detail"), reply_markup=keyboard)
         else:
@@ -191,44 +159,23 @@ async def help_command(_, ctx: Message, strings):
                 strings("help_name").format(mod=HELPABLE[name].__MODULE__)
                 + HELPABLE[name].__HELP__
             )
-            await ctx.reply_msg(
-                text,
-                disable_web_page_preview=True,
-                message_effect_id=5104841245755180586,
-            )
+            await ctx.reply_msg(text, disable_web_page_preview=True)
         else:
             text, help_keyboard = await help_parser(ctx.from_user.first_name)
-            await ctx.reply_msg(
-                text,
-                reply_markup=help_keyboard,
-                disable_web_page_preview=True,
-                message_effect_id=5104841245755180586,
-            )
+            await ctx.reply_msg(text, reply_markup=help_keyboard, disable_web_page_preview=True)
     else:
         text, help_keyboard = await help_parser(ctx.from_user.first_name)
-        await ctx.reply_msg(
-            text,
-            reply_markup=help_keyboard,
-            disable_web_page_preview=True,
-            message_effect_id=5104841245755180586,
-        )
+        await ctx.reply_msg(text, reply_markup=help_keyboard, disable_web_page_preview=True)
 
 
 async def help_parser(name, keyb=None):
     if not keyb:
         keyb = InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help"))
     return (
-        """Hello {first_name}, My name is {bot_name}.
-I'm a bot with some useful features. You can change language bot using /setlang command, but it's still in beta stage.
-You can choose an option below, by clicking a button.
+        f"""Hey {name}~ 🌸 I’m {BOT_NAME}, your anime-themed assistant.
 
-Send command /privacy if you want know data collected by this bot.
-
-If you want give coffee to my owner you can send /donate command for more info.
-""".format(
-            first_name=name,
-            bot_name="MissKaty",
-        ),
+Here to help you moderate, play, or just vibe in your groups!
+Click a button below to explore my features!""",
         keyb,
     )
 
@@ -242,9 +189,11 @@ async def help_button(self: Client, query: CallbackQuery, strings):
     next_match = re.match(r"help_next\((.+?)\)", query.data)
     back_match = re.match(r"help_back", query.data)
     create_match = re.match(r"help_create", query.data)
+
     top_text = strings("help_txt").format(
         kamuh=query.from_user.first_name, bot=self.me.first_name
     )
+
     if mod_match:
         module = mod_match[1].replace(" ", "_")
         text = (
@@ -253,9 +202,7 @@ async def help_button(self: Client, query: CallbackQuery, strings):
         )
         if module == "federation":
             return await query.message.edit(
-                text=text,
-                reply_markup=FED_MARKUP,
-                disable_web_page_preview=True,
+                text=text, reply_markup=FED_MARKUP, disable_web_page_preview=True
             )
         await query.message.edit_msg(
             text=text,
@@ -265,11 +212,7 @@ async def help_button(self: Client, query: CallbackQuery, strings):
             disable_web_page_preview=True,
         )
     elif home_match:
-        await app.send_msg(
-            query.from_user.id,
-            text=home_text_pm,
-            reply_markup=home_keyboard_pm,
-        )
+        await app.send_msg(query.from_user.id, text=home_text_pm, reply_markup=home_keyboard_pm)
         await query.message.delete_msg()
     elif prev_match:
         curr_page = int(prev_match[1])
@@ -280,7 +223,6 @@ async def help_button(self: Client, query: CallbackQuery, strings):
             ),
             disable_web_page_preview=True,
         )
-
     elif next_match:
         next_page = int(next_match[1])
         await query.message.edit_msg(
@@ -290,23 +232,15 @@ async def help_button(self: Client, query: CallbackQuery, strings):
             ),
             disable_web_page_preview=True,
         )
-
     elif back_match:
         await query.message.edit_msg(
             text=top_text,
             reply_markup=InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help")),
             disable_web_page_preview=True,
         )
-
     elif create_match:
         text, keyb = await help_parser(query)
-        await query.message.edit_msg(
-            text=text,
-            reply_markup=keyb,
-            disable_web_page_preview=True,
-        )
+        await query.message.edit_msg(text=text, reply_markup=keyb, disable_web_page_preview=True)
 
-    try:
+    with contextlib.suppress(Exception):
         await self.answer_callback_query(query.id)
-    except:
-        pass
