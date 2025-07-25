@@ -7,24 +7,16 @@ from misskaty.helper import bot_sys_stats, paginate_modules
 from misskaty.helper.localization import use_chat_lang
 from misskaty.vars import COMMAND_HANDLER
 
-# 🦋 Custom Butterfly Anime Image
 START_IMG = "https://files.catbox.moe/6inxw1.jpg"
-
-HOME_TEXT_PM = f"""
-🦋 **Konichiwa!** I'm **{BOT_NAME}**, your anime-themed Telegram assistant.
-
-I can manage your groups, control spam, and bring many cool features to your chat!
-
-➥ Use the buttons below to explore my features.
-"""
 
 HOME_KEYBOARD_PM = InlineKeyboardMarkup([
     [InlineKeyboardButton("📚 Commands", callback_data="bot_commands")],
-    [InlineKeyboardButton("💻 System Stats", callback_data="stats_callback")],
-    [InlineKeyboardButton("👨‍💻 Dev", url="https://t.me/Sarkar_Terminal")],
-    [InlineKeyboardButton("➕ Add Me To Group", url=f"https://t.me/{BOT_USERNAME}?startgroup=true")]
+    [InlineKeyboardButton("💻 System Stats", callback_data="stats_callback"),
+     InlineKeyboardButton("👨‍💻 Dev", url="https://t.me/Sarkar_Terminal")],
+    [InlineKeyboardButton("➕ Add Me", url=f"https://t.me/{BOT_USERNAME}?startgroup=true")]
 ])
 
+HOME_TEXT_PM = f"Hey! I'm {BOT_NAME}, your anime-themed group assistant bot 🦋\n\nAdd me to your group and enjoy the features!"
 
 @app.on_message(filters.command("start", COMMAND_HANDLER))
 @use_chat_lang()
@@ -33,11 +25,11 @@ async def start(_, m: Message, strings):
         try:
             return await m.reply_photo(
                 photo=START_IMG,
-                caption="🦋 I'm online and ready to help! Use /help for full command list.",
+                caption=strings("start_msg").format(kamuh=m.from_user.mention),
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton("📚 Help", url=f"https://t.me/{BOT_USERNAME}?start=help")],
-                    [InlineKeyboardButton("💻 System Stats", callback_data="stats_callback")],
-                    [InlineKeyboardButton("👨‍💻 Dev", url="https://t.me/Sarkar_Terminal")]
+                    [InlineKeyboardButton("💻 System Stats", callback_data="stats_callback"),
+                     InlineKeyboardButton("👨‍💻 Dev", url="https://t.me/Sarkar_Terminal")]
                 ])
             )
         except ChatSendPhotosForbidden:
@@ -50,9 +42,7 @@ async def start(_, m: Message, strings):
             if mod in HELPABLE:
                 return await m.reply(
                     f"**{HELPABLE[mod].__MODULE__}**\n{HELPABLE[mod].__HELP__}",
-                    reply_markup=InlineKeyboardMarkup([
-                        [InlineKeyboardButton("⬅️ Back", callback_data="help_back")]
-                    ])
+                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back", callback_data="help_back")]])
                 )
         elif param == "help":
             txt, btn = await help_parser(m.from_user.first_name)
@@ -65,7 +55,7 @@ async def start(_, m: Message, strings):
 async def help(_, m: Message):
     if m.chat.type != "private":
         return await m.reply(
-            "🦋 Click below to get help in PM.",
+            "Click the button below to view help in PM.",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("📚 Open Help", url=f"https://t.me/{BOT_USERNAME}?start=help")]
             ])
@@ -86,16 +76,13 @@ async def stats_cb(_, cb: CallbackQuery):
     await cb.answer(stats, show_alert=True)
 
 
-async def help_parser(name):
-    buttons = paginate_modules(0, HELPABLE, "help")
-    return f"**{BOT_NAME} Help Menu for {name}**\nChoose a module below:", InlineKeyboardMarkup(buttons)
 @app.on_callback_query(filters.regex("help_back"))
 async def help_back_cb(_, cb: CallbackQuery):
     txt, btn = await help_parser(cb.from_user.first_name)
     await cb.message.edit_text(txt, reply_markup=btn)
 
 
-@app.on_callback_query(filters.regex("help_(.*)"))
+@app.on_callback_query(filters.regex(r"help_(.+)"))
 async def help_module_cb(_, cb: CallbackQuery):
     mod = cb.data.split("help_")[1]
     if mod in HELPABLE:
@@ -107,3 +94,8 @@ async def help_module_cb(_, cb: CallbackQuery):
         )
     else:
         await cb.answer("❌ Module not found.", show_alert=True)
+
+
+async def help_parser(name):
+    buttons = paginate_modules(0, HELPABLE, "help")
+    return f"**{BOT_NAME} Help for {name}**\nSelect a module below:", InlineKeyboardMarkup(buttons)
