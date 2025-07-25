@@ -487,7 +487,7 @@ async def imdb_id_callback(self: Client, query: CallbackQuery):
                     for i in keywd.split(",")
                 )
                 res_str += (
-                    f"<b>🔥 Kata Kunci:</b>\n<blockquote>{key_[:-2]}</blockquote>\n"
+                    f"<b>🦋 Kata Kunci:</b>\n<blockquote>{key_[:-2]}</blockquote>\n"
                 )
             if award := sop.select('li[data-testid="award_information"]'):
                 awards = (
@@ -664,7 +664,7 @@ async def imdb_en_callback(self: Client, query: CallbackQuery):
                     for i in r_json["keywords"].split(",")
                 )
                 res_str += (
-                    f"<b>🔥 Keywords:</b>\n<blockquote>{key_[:-2]}</blockquote>\n"
+                    f"<b>🦋 Keywords:</b>\n<blockquote>{key_[:-2]}</blockquote>\n"
                 )
             if award := sop.select('li[data-testid="award_information"]'):
                 awards = (
