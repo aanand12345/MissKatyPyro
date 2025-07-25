@@ -4,9 +4,9 @@ from asyncio import Lock
 from pyrogram import filters, __version__ as pyrover
 from pyrogram.types import Message
 
-from anu import app, botStartTime, anu_version
-from anu.helper.human_read import get_readable_time
-from anu.vars import COMMAND_HANDLER
+from misskaty import app, botStartTime, misskaty_version as anu_version
+from misskaty.helper.human_read import get_readable_time
+from misskaty.vars import COMMAND_HANDLER
 
 PING_LOCK = Lock()
 
@@ -17,7 +17,6 @@ async def anime_ping(_, ctx: Message):
     start = time.time()
     msg = await ctx.reply("⌛ Starting ping...")
 
-    # Anime-style fake animation (quick edits with small delays)
     await msg.edit("🦋 Initializing <b>AnuCore Protocol...</b>")
     await msg.edit("⚡ Charging up <b>Chakra</b>...")
     await msg.edit("💫 Summoning <b>Spirit Network Link</b>...")
