@@ -730,7 +730,7 @@ async def imdb_inl(_, query):
                     for i in r_json["keywords"].split(",")
                 )
                 res_str += (
-                    f"<b>🔥 Kata Kunci:</b>\n<blockquote>{key_[:-2]}</blockquote>\n"
+                    f"<b>🦋 Kata Kunci:</b>\n<blockquote>{key_[:-2]}</blockquote>\n"
                 )
             if award := sop.select('li[data-testid="award_information"]'):
                 awards = (
