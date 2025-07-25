@@ -3,50 +3,40 @@ import re
 
 from pyrogram import Client, filters
 from pyrogram.errors import ChatSendPhotosForbidden, ChatWriteForbidden, QueryIdInvalid
-from pyrogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
+from pyrogram.types import (
+    CallbackQuery,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    Message,
+)
 
 from misskaty import BOT_NAME, BOT_USERNAME, HELPABLE, app
 from misskaty.helper import bot_sys_stats, paginate_modules
 from misskaty.helper.localization import use_chat_lang
 from misskaty.vars import COMMAND_HANDLER
 
+ANIME_START_PHOTO = "https://files.catbox.moe/6inxw1.jpg"
 
 home_keyboard_pm = InlineKeyboardMarkup(
     [
         [
-            InlineKeyboardButton(text="Commands ❓", callback_data="bot_commands"),
+            InlineKeyboardButton("Commands ✨", callback_data="bot_commands"),
+            InlineKeyboardButton("System Stats 💻", callback_data="stats_callback"),
         ],
         [
-            InlineKeyboardButton(text="System Stats 💻", callback_data="stats_callback"),
-            InlineKeyboardButton(text="Dev 👨‍💻", url="https://t.me/Sarkar_Terminal"),
-        ],
-        [
-            InlineKeyboardButton(
-                text="Add Me To Your Group 🧩",
-                url=f"http://t.me/{BOT_USERNAME}?startgroup=true",
-            )
+            InlineKeyboardButton("Add Me To Your Group 🎉", url=f"http://t.me/{BOT_USERNAME}?startgroup=true")
         ],
     ]
 )
 
-home_text_pm = f"""
-Hey there! I’m {BOT_NAME} ✨
-
-An anime-themed Telegram bot with awesome powers for your groups.
-
-Click below to see what I can do or add me to your group to get started!
-"""
-
+home_text_pm = f"Kon'nichiwa~! 🌸 I'm {BOT_NAME}, your cute and helpful assistant!\n\nClick the buttons below to explore my powers~ ✨\n\nNeed help? Use `/help` or press the buttons~"
 
 keyboard = InlineKeyboardMarkup(
     [
         [
-            InlineKeyboardButton(text="Help ❓", url=f"http://t.me/{BOT_USERNAME}?start=help"),
-        ],
-        [
-            InlineKeyboardButton(text="System Stats 💻", callback_data="stats_callback"),
-            InlineKeyboardButton(text="Dev 👨‍💻", url="https://t.me/Sarkar_Terminal"),
-        ],
+            InlineKeyboardButton("Help 📖", url=f"t.me/{BOT_USERNAME}?start=help"),
+            InlineKeyboardButton("Status 💫", callback_data="stats_callback"),
+        ]
     ]
 )
 
@@ -73,13 +63,12 @@ async def start(self, ctx: Message, strings):
         nama = ctx.from_user.mention if ctx.from_user else ctx.sender_chat.title
         try:
             return await ctx.reply_photo(
-                photo="https://img.yasirweb.eu.org/file/90e9a448bc2f8b055b762.jpg",
+                photo=ANIME_START_PHOTO,
                 caption=strings("start_msg").format(kamuh=nama),
                 reply_markup=keyboard,
             )
         except (ChatSendPhotosForbidden, ChatWriteForbidden):
             return await ctx.chat.leave()
-
     if len(ctx.text.split()) > 1:
         name = (ctx.text.split(None, 1)[1]).lower()
         if "_" in name:
@@ -93,32 +82,42 @@ async def start(self, ctx: Message, strings):
                     text=text,
                     reply_markup=FED_MARKUP,
                     disable_web_page_preview=True,
+                    message_effect_id=5104841245755180586,
                 )
-            await ctx.reply(
+            return await ctx.reply(
                 text,
                 reply_markup=InlineKeyboardMarkup(
                     [[InlineKeyboardButton("Back", callback_data="help_back")]]
                 ),
                 disable_web_page_preview=True,
+                message_effect_id=5104841245755180586,
             )
         elif name == "help":
             text, keyb = await help_parser(ctx.from_user.first_name)
-            await ctx.reply_msg(text, reply_markup=keyb)
+            await ctx.reply_msg(
+                text, reply_markup=keyb, message_effect_id=5104841245755180586
+            )
     else:
         await self.send_photo(
             ctx.chat.id,
-            photo="https://img.yasirweb.eu.org/file/90e9a448bc2f8b055b762.jpg",
+            photo=ANIME_START_PHOTO,
             caption=home_text_pm,
             reply_markup=home_keyboard_pm,
             reply_to_message_id=ctx.id,
+            message_effect_id=5104841245755180586,
         )
 
 
 @app.on_callback_query(filters.regex("bot_commands"))
 async def commands_callbacc(_, cb: CallbackQuery):
     text, keyb = await help_parser(cb.from_user.mention)
-    await app.send_message(cb.message.chat.id, text=text, reply_markup=keyb)
-    await cb.message.delete()
+    await app.send_message(
+        cb.message.chat.id,
+        text=text,
+        reply_markup=keyb,
+        message_effect_id=5104841245755180586,
+    )
+    await cb.message.delete_msg()
 
 
 @app.on_callback_query(filters.regex("stats_callback"))
@@ -140,35 +139,58 @@ async def help_command(_, ctx: Message, strings):
                         [
                             InlineKeyboardButton(
                                 text=strings("click_me"),
-                                url=f"http://t.me/{BOT_USERNAME}?start=help_{name}",
+                                url=f"t.me/{BOT_USERNAME}?start=help_{name}",
                             )
-                        ]
+                        ],
                     ]
                 )
-                await ctx.reply(strings("pm_cmd_msg"), reply_markup=key)
-                return
-
-        key = InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton(
-                        text=strings("click_me"),
-                        url=f"http://t.me/{BOT_USERNAME}?start=help",
-                    )
-                ]
-            ]
+                await ctx.reply_msg(strings("click_btn").format(nm=name), reply_markup=key)
+            else:
+                await ctx.reply_msg(strings("pm_detail"), reply_markup=keyboard)
+        else:
+            await ctx.reply_msg(strings("pm_detail"), reply_markup=keyboard)
+    elif len(ctx.command) >= 2:
+        name = (ctx.text.split(None, 1)[1]).replace(" ", "_").lower()
+        if str(name) in HELPABLE:
+            text = (
+                strings("help_name").format(mod=HELPABLE[name].__MODULE__)
+                + HELPABLE[name].__HELP__
+            )
+            await ctx.reply_msg(
+                text,
+                disable_web_page_preview=True,
+                message_effect_id=5104841245755180586,
+            )
+        else:
+            text, help_keyboard = await help_parser(ctx.from_user.first_name)
+            await ctx.reply_msg(
+                text,
+                reply_markup=help_keyboard,
+                disable_web_page_preview=True,
+                message_effect_id=5104841245755180586,
+            )
+    else:
+        text, help_keyboard = await help_parser(ctx.from_user.first_name)
+        await ctx.reply_msg(
+            text,
+            reply_markup=help_keyboard,
+            disable_web_page_preview=True,
+            message_effect_id=5104841245755180586,
         )
-        await ctx.reply(strings("pm_cmd_msg"), reply_markup=key)
-        return
-
-    text, keyb = await help_parser(ctx.from_user.first_name)
-    await ctx.reply(text=text, reply_markup=keyb)
 
 
-# Helper for help_parser
-async def help_parser(name):
-    buttons = paginate_modules(0, HELPABLE, "help")
+async def help_parser(name, keyb=None):
+    if not keyb:
+        keyb = InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help"))
     return (
-        f"**{BOT_NAME} Help Panel for {name}**\nChoose a category below:",
-        InlineKeyboardMarkup(buttons),
-                        )
+        f"""Kon'nichiwa {name}~ 🌸
+
+I'm your assistant bot **{BOT_NAME}** here to help you ✨
+
+Use the buttons below or `/help <module>` to explore my commands.
+
+💬 Tip: Use `/setlang` to set your language (Beta)
+🍵 Wanna support me? Send /donate for coffee ☕
+""",
+        keyb,
+    )
