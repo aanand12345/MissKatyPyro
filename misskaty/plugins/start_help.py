@@ -89,3 +89,21 @@ async def stats_cb(_, cb: CallbackQuery):
 async def help_parser(name):
     buttons = paginate_modules(0, HELPABLE, "help")
     return f"**{BOT_NAME} Help Menu for {name}**\nChoose a module below:", InlineKeyboardMarkup(buttons)
+@app.on_callback_query(filters.regex("help_back"))
+async def help_back_cb(_, cb: CallbackQuery):
+    txt, btn = await help_parser(cb.from_user.first_name)
+    await cb.message.edit_text(txt, reply_markup=btn)
+
+
+@app.on_callback_query(filters.regex("help_(.*)"))
+async def help_module_cb(_, cb: CallbackQuery):
+    mod = cb.data.split("help_")[1]
+    if mod in HELPABLE:
+        await cb.message.edit_text(
+            f"**{HELPABLE[mod].__MODULE__}**\n{HELPABLE[mod].__HELP__}",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("⬅️ Back", callback_data="help_back")]
+            ])
+        )
+    else:
+        await cb.answer("❌ Module not found.", show_alert=True)
